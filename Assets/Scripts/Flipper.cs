@@ -2,8 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Flipper : MonoBehaviour {
-    public float pushForce;
+public class Flipper : MonoBehaviour
+{
+    public float startAngle;
+    public float maxAngle;
+    public float rotationTime;
+    public KeyCode triggerKey;
 
     private Rigidbody2D rigidbody2D;
 
@@ -11,45 +15,45 @@ public class Flipper : MonoBehaviour {
     private float startTime = 0.0f;
 
 	// Use this for initialization
-	void Start () {
+	private void Start () {
         rigidbody2D = GetComponent<Rigidbody2D>();
 	}
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
         if (running)
         {
-            float delta = Time.time - startTime;
-            if (delta > 0.6)
+            var  delta = Time.time - startTime;
+            if (delta > rotationTime)
             {
                 running = false;
-                rigidbody2D.MoveRotation(0);
+                rigidbody2D.MoveRotation(startAngle);
             }
             else
             {
-                rigidbody2D.MoveRotation(90 * Easing(delta / 0.6f));
+                rigidbody2D.MoveRotation(startAngle + (maxAngle - startAngle) * Easing(delta / rotationTime));
             }
         }
-        else
+        else if (Input.GetKeyDown(triggerKey))
         {
-            if (Input.GetKeyDown("right"))
-            {
-                running = true;
-                startTime = Time.time;
-            }
+            running = true;
+            startTime = Time.time;
         }
     }
 
-    float Easing(float p)
+    /**
+     *  Takes a number  0-1, and gives a number 0-1
+     */
+    private static float Easing(float p)
     {
-        if ((1-p) < 0.4)
+        if (p < 0.5)
         {
-            return Mathf.Exp(1.733f * (1-p)) - 1;
+            return 2 * p;
         }
         else
         {
-            return Mathf.Exp(-11.5129f * (1-p) + 4.60517f) - 0.001f;
+            return 2 - 2 * p;
         }
     }
 }
