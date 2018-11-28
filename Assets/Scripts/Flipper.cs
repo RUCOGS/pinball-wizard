@@ -2,38 +2,46 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
 public class Flipper : MonoBehaviour
 {
-    public float startAngle;
-    public float maxAngle;
-    public float rotationTime;
     public KeyCode triggerKey;
-
+    public float degreeChange;
+    public float rotationTime;
+    
     private Rigidbody2D rigidbody2D;
-
+    
+    private float startAngle;
+    private float coefficient;
+    
     private bool running = false;
     private float startTime = 0.0f;
 
-	// Use this for initialization
 	private void Start () {
         rigidbody2D = GetComponent<Rigidbody2D>();
+	    
+	    // startAngle and coefficient are calculated on Start from the public values, and
+	    // the beginning angle of the object
+	    startAngle = transform.eulerAngles.z;
+	    coefficient = degreeChange / rotationTime;
 	}
 
-    // Update is called once per frame
     private void Update()
     {
         if (running)
         {
+            float angle;
             var  delta = Time.time - startTime;
             if (delta > rotationTime)
             {
                 running = false;
-                rigidbody2D.MoveRotation(startAngle);
+                angle = startAngle;
             }
             else
             {
-                rigidbody2D.MoveRotation(startAngle + (maxAngle - startAngle) * Easing(delta / rotationTime));
+                angle = startAngle + coefficient * Easing(delta / rotationTime);
             }
+            rigidbody2D.MoveRotation(angle);
         }
         else if (Input.GetKeyDown(triggerKey))
         {
